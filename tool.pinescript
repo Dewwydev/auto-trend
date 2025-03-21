@@ -1,0 +1,37 @@
+//@version=5
+indicator("Auto Trend Line Indicator", overlay=true)
+
+// Settings
+length = input.int(20, title="Swing Length", minval=1)
+lookback = input.int(100, title="Lookback Period", minval=1)
+
+// Find swing highs and lows
+var float lastSwingHigh = na
+var float lastSwingLow = na
+var int swingHighBarIndex = na
+var int swingLowBarIndex = na
+
+// Function to identify swing highs and lows
+isSwingHigh(index) =>
+    high[index] > high[index - 1] and high[index] > high[index + 1]
+
+isSwingLow(index) =>
+    low[index] < low[index - 1] and low[index] < low[index + 1]
+
+// Detecting the latest swing highs and lows
+for i = length to lookback
+    if isSwingHigh(i)
+        lastSwingHigh := high[i]
+        swingHighBarIndex := i
+        break
+
+for i = length to lookback
+    if isSwingLow(i)
+        lastSwingLow := low[i]
+        swingLowBarIndex := i
+        break
+
+// Draw trend lines
+if (not na(lastSwingHigh) and not na(lastSwingLow))
+    line.new(bar_index[swingHighBarIndex], lastSwingHigh, bar_index[swingLowBarIndex], lastSwingLow, color=color.green, width=2)
+
